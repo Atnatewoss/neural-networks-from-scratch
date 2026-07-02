@@ -1,16 +1,105 @@
 # NN from Scratch
 
 A minimal neural network framework built from scratch in Rust.
-Educational -- implements forward propagation, backpropagation, and mini-batch gradient descent without any ML framework dependencies.
+Educational -- implements forward propagation, backpropagation, and
+mini-batch gradient descent without any ML framework dependencies.
 
-## Dataset
+## Getting Started
 
-**MNIST** -- handwritten digit classification (0-9).
-- 60,000 training images (split: 50k train / 10k validation)
-- 10,000 test images
-- 28x28 grayscale pixels (784 features), normalized to [0, 1]
+### Prerequisites
 
-Downloaded automatically on first run via HTTPS (ureq + flate2).
+- [Rust](https://www.rust-lang.org/tools/install) (edition 2021)
+
+### Run
+
+```sh
+cargo run --release
+```
+
+On first run, MNIST is downloaded automatically (~12 MB). Training
+progress is printed per epoch:
+
+```
+Epoch          Cost       Train         Val        Test
+    0      2.347987      10.21%       9.67%       9.98%
+```
+
+Hyperparameters can be overridden in `src/main.rs`:
+
+```rust
+let config = Config { learning_rate: 0.1, ..Config::default() };
+```
+
+## Pipeline
+
+```
+                         ┌─────────────────────┐
+                         │   MNIST on disk      │
+                         │  (4 IDX gzip files)  │
+                         └──────────┬──────────┘
+                                    │ download + decompress
+                                    ▼
+                         ┌─────────────────────┐
+                         │   Raw u8 bytes       │
+                         │  60k train + 10k test│
+                         └──────────┬──────────┘
+                                    │ flatten + /255 one-hot encode
+                                    ▼
+                         ┌─────────────────────┐
+                         │   Normalised data    │
+                         │  (784, m) + (10, m) │
+                         └──────────┬──────────┘
+                                    │ shuffle + split
+                                    ▼
+         ┌──────────────────────────┼──────────────────────────┐
+         ▼                          ▼                          ▼
+  (784, 50000)               (784, 10000)              (784, 10000)
+   train_images               val_images                test_images
+  + (10, 50000)              + (10, 10000)             + (10, 10000)
+   train_labels               val_labels                test_labels
+         │
+         │ mini-batch SGD (batch_size=64)
+         ▼
+  ┌─────────────────────────────────────────────────────────────┐
+  │                    Training Loop (per epoch)                 │
+  │                                                             │
+  │  1. Shuffle training set (Fisher-Yates)                     │
+  │  2. For each mini-batch:                                    │
+  │       ┌──────────────────┐                                  │
+  │       │ Forward prop      │  X → Z1 → ReLU → A1 →          │
+  │       │                   │  Z2 → softmax → A2             │
+  │       └────────┬─────────┘                                  │
+  │                ▼                                            │
+  │       ┌──────────────────┐                                  │
+  │       │ Compute cost     │  CE = -1/m Σ Y·ln(A2)           │
+  │       └────────┬─────────┘                                  │
+  │                ▼                                            │
+  │       ┌──────────────────┐                                  │
+  │       │ Backward prop    │  dZ2 = A2 - Y                    │
+  │       │                  │  dW2 = (1/m)·dZ2·A1ᵀ            │
+  │       │                  │  dZ1 = W2ᵀ·dZ2 ⊙ ReLU'(Z1)     │
+  │       │                  │  dW1 = (1/m)·dZ1·Xᵀ             │
+  │       └────────┬─────────┘                                  │
+  │                ▼                                            │
+  │       ┌──────────────────┐                                  │
+  │       │ Parameter update │  W ← W - lr · dW                │
+  │       └──────────────────┘                                  │
+  │                                                             │
+  │  3. Evaluate: accuracy on train / val / test                │
+  └─────────────────────────────────────────────────────────────┘
+                                    │
+                                    ▼
+                         ┌─────────────────────┐
+                         │   Trained model     │
+                         │  (W1, b1, W2, b2)  │
+                         └──────────┬──────────┘
+                                    │ predict: forward(A2) → argmax
+                                    ▼
+                         ┌─────────────────────┐
+                         │   Predicted digit   │
+                         │       (0-9)          │
+                         └─────────────────────┘
+```
 
 ## Architecture
 
@@ -23,24 +112,15 @@ Downloaded automatically on first run via HTTPS (ureq + flate2).
 - Softmax + categorical cross-entropy (output layer)
 - Mini-batch SGD optimizer
 
-## Usage
+## Dataset
 
-```
-cargo run --release
-```
+**MNIST** -- handwritten digit classification (0-9).
+- 60,000 training images (split: 50k train / 10k validation)
+- 10,000 test images
+- 28x28 grayscale pixels (784 features), normalized to [0, 1]
 
-Training progress is printed per epoch:
-
-```
-Epoch          Cost       Train         Val        Test
-    0      2.347987      10.21%       9.67%       9.98%
-```
-
-Hyperparameters are set in `src/config.rs` and can be overridden in `src/main.rs`:
-
-```rust
-let config = Config { learning_rate: 0.1, ..Config::default() };
-```
+Downloaded automatically on first run via HTTPS (ureq + flate2)
+and cached in `data/`.
 
 ## Project Structure
 
@@ -57,7 +137,7 @@ src/
     compute_cost.rs         -- categorical cross-entropy
     initialize_parameters.rs -- He initialization
     update_parameters.rs    -- SGD weight update
-    predict.rs              -- inference (argmax over softmax)
+    predict.rs              -- inference (forward + argmax)
     evaluate.rs             -- accuracy computation
     layer_size.rs           -- dimension extraction
   utils/
