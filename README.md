@@ -20,8 +20,8 @@ On first run, MNIST is downloaded automatically (~12 MB). Training
 progress is printed per epoch:
 
 ```
-Epoch          Cost       Train         Val        Test
-    0      2.347987      10.21%       9.67%       9.98%
+Epoch          Cost       Train         Val
+    0      2.347987      10.21%       9.67%
 ```
 
 Hyperparameters can be overridden in `src/main.rs`:
@@ -32,7 +32,7 @@ let config = Config { learning_rate: 0.1, ..Config::default() };
 
 ### Model Persistence
 
-After training, the model is automatically saved to `models/mnist.nn`
+After training, the model is automatically saved to `models/mnist.json`
 as JSON. To reload it later and run inference on test data:
 
 ```rust
@@ -99,18 +99,20 @@ println!("Test accuracy: {:.2}%", acc);
   │       │ Parameter update │  W ← W - lr · dW                │
   │       └──────────────────┘                                  │
   │                                                             │
-  │  3. Evaluate: accuracy on train / val / test                │
+  │  3. Evaluate: accuracy on train / val                       │
   └─────────────────────────────────────────────────────────────┘
                                     │
                                     ▼
-                         ┌─────────────────────┐
-                         │   Trained model     │
-                         │  (W1, b1, W2, b2)  │
-                         └──────────┬──────────┘
+                          ┌─────────────────────┐
+                          │   Trained model     │
+                          │  (W1, b1, W2, b2)  │
+                          ├─────────────────────┤
+                          │ Evaluate on test    │
+                          └──────────┬──────────┘
                                     │ save (JSON)
                                     ▼
-                         ┌─────────────────────┐
-                         │  models/mnist.json  │
+                          ┌─────────────────────┐
+                          │  models/mnist.json  │
                          └──────────┬──────────┘
                                     │ load
                                     ▼
@@ -172,8 +174,9 @@ src/
     ReLU.rs            -- ReLU activation (scalar and matrix)
     softmax.rs         -- stable softmax (max subtraction)
   data/
+    .gitkeep           -- dataset directory
   models/
-    README.md          -- describes the model storage format
+    .gitkeep           -- saved model parameters go here
     mod.rs             -- data module declaration
     mnist.rs           -- module root: MnistData struct + load() orchestration
     mnist/

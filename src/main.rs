@@ -24,7 +24,10 @@ fn main() {
         config.num_epochs, config.batch_size, config.learning_rate);
 
     let (W1, b1, W2, b2, _costs) =
-        nn_model::nn_model(X_train, Y_train, X_val, Y_val, X_test, Y_test, &config);
+        nn_model::nn_model(X_train, Y_train, X_val, Y_val, &config);
+
+    let test_acc = evaluate::accuracy(X_test, Y_test, &W1, &b1, &W2, &b2);
+    println!("\nTest accuracy: {:.2}%\n", test_acc);
 
     let model_dir = Path::new("models");
     fs::create_dir_all(model_dir).expect("failed to create models/");
@@ -34,6 +37,6 @@ fn main() {
     // round-trip: load back and verify accuracy matches
     let (W1_l, b1_l, W2_l, b2_l, _n_h_l) = save_load::load(&model_path);
     let loaded_acc = evaluate::accuracy(X_test, Y_test, &W1_l, &b1_l, &W2_l, &b2_l);
-    let test_acc = evaluate::accuracy(X_test, Y_test, &W1, &b1, &W2, &b2);
-    println!("\nTest accuracy: {:.2}%  (loaded: {:.2}%)", test_acc, loaded_acc);
+    println!("Reloaded accuracy: {:.2}%  (match: {})", loaded_acc,
+        if (test_acc - loaded_acc).abs() < 0.01 { "yes" } else { "no" });
 }

@@ -13,8 +13,6 @@ pub fn nn_model(
     Y_train: &Matrix,
     X_val: &Matrix,
     Y_val: &Matrix,
-    X_test: &Matrix,
-    Y_test: &Matrix,
     config: &Config,
 ) -> (Matrix, Matrix, Matrix, Matrix, Vec<f64>) {
     /*
@@ -23,8 +21,6 @@ pub fn nn_model(
         Y_train -- training labels (one-hot), shape (n_y, m_train)
         X_val   -- validation input, shape (n_x, m_val)
         Y_val   -- validation labels (one-hot), shape (n_y, m_val)
-        X_test  -- test input, shape (n_x, m_test)
-        Y_test  -- test labels (one-hot), shape (n_y, m_test)
         config  -- Config with n_h, learning_rate, num_epochs, batch_size, print_cost
 
     Returns:
@@ -38,7 +34,7 @@ pub fn nn_model(
 
     let (mut W1, mut b1, mut W2, mut b2) = initialize_parameters::initialize_parameters(n_x, config.n_h, n_y);
 
-    println!("{:>5}  {:>12}  {:>10}  {:>10}  {:>10}", "Epoch", "Cost", "Train", "Val", "Test");
+    println!("{:>5}  {:>12}  {:>10}  {:>10}", "Epoch", "Cost", "Train", "Val");
 
     let mut rng = rand::thread_rng();
     let mut costs = Vec::new();
@@ -92,9 +88,8 @@ pub fn nn_model(
         if config.print_cost {
             let train_acc = evaluate::accuracy(X_train, Y_train, &W1, &b1, &W2, &b2);
             let val_acc = evaluate::accuracy(X_val, Y_val, &W1, &b1, &W2, &b2);
-            let test_acc = evaluate::accuracy(X_test, Y_test, &W1, &b1, &W2, &b2);
-            println!("{:>5}  {:>12.6}  {:>9.2}%  {:>9.2}%  {:>9.2}%",
-                epoch, avg_cost, train_acc, val_acc, test_acc);
+            println!("{:>5}  {:>12.6}  {:>9.2}%  {:>9.2}%",
+                epoch, avg_cost, train_acc, val_acc);
         }
     }
 
