@@ -13,6 +13,8 @@ pub struct Matrix {
 }
 
 impl Matrix {
+    // ── Constructors ──────────────────────────────────────────────
+
     /*
     Creates a new matrix filled with 0.0
       rows: number of rows
@@ -66,6 +68,8 @@ impl Matrix {
         Matrix { data, rows, cols }
     }
 
+    // ── Shape / Access ────────────────────────────────────────────
+
     /*
     Returns (rows, cols)
     */
@@ -105,6 +109,8 @@ impl Matrix {
         self.cols = new_cols;
     }
 
+    // ── Linear Algebra ────────────────────────────────────────────
+
     /*
     Matrix multiplication: self (rows x k) · other (k x cols) -> (rows x cols)
     */
@@ -126,6 +132,21 @@ impl Matrix {
         }
         result
     }
+
+    /*
+    Returns the transpose
+    */
+    pub fn transpose(&self) -> Matrix {
+        let mut data = vec![0.0; self.rows * self.cols];
+        for i in 0..self.rows {
+            for j in 0..self.cols {
+                data[j * self.rows + i] = self.data[i * self.cols + j];
+            }
+        }
+        Matrix { data, rows: self.cols, cols: self.rows }
+    }
+
+    // ── Element-wise Operations ───────────────────────────────────
 
     /*
     Element-wise addition.
@@ -178,17 +199,52 @@ impl Matrix {
     }
 
     /*
-    Returns the transpose
+    Applies a function element-wise, returns a new matrix
     */
-    pub fn transpose(&self) -> Matrix {
-        let mut data = vec![0.0; self.rows * self.cols];
-        for i in 0..self.rows {
-            for j in 0..self.cols {
-                data[j * self.rows + i] = self.data[i * self.cols + j];
-            }
-        }
-        Matrix { data, rows: self.cols, cols: self.rows }
+    pub fn map<F>(&self, f: F) -> Matrix
+    where
+        F: Fn(f64) -> f64,
+    {
+        let data = self.data.iter().map(|a| f(*a)).collect();
+        Matrix { data, rows: self.rows, cols: self.cols }
     }
+
+    /*
+    Applies a function in-place
+    */
+    pub fn apply<F>(&mut self, f: F)
+    where
+        F: Fn(f64) -> f64,
+    {
+        for a in self.data.iter_mut() {
+            *a = f(*a);
+        }
+    }
+
+    // ── Math Functions (element-wise) ─────────────────────────────
+
+    /*
+    Element-wise natural log
+    */
+    pub fn log(&self) -> Matrix {
+        self.map(|x| x.ln())
+    }
+
+    /*
+    Element-wise exp
+    */
+    pub fn exp(&self) -> Matrix {
+        self.map(|x| x.exp())
+    }
+
+    /*
+    Element-wise power
+    */
+    pub fn pow(&self, exp: f64) -> Matrix {
+        self.map(|x| x.powf(exp))
+    }
+
+    // ── Reductions ────────────────────────────────────────────────
 
     /*
     Sums along an axis and returns a row (axis=0) or column (axis=1) vector
@@ -229,57 +285,6 @@ impl Matrix {
     }
 
     /*
-    Applies a function element-wise, returns a new matrix
-    */
-    pub fn map<F>(&self, f: F) -> Matrix
-    where
-        F: Fn(f64) -> f64,
-    {
-        let data = self.data.iter().map(|a| f(*a)).collect();
-        Matrix { data, rows: self.rows, cols: self.cols }
-    }
-
-    /*
-    Applies a function in-place
-    */
-    pub fn apply<F>(&mut self, f: F)
-    where
-        F: Fn(f64) -> f64,
-    {
-        for a in self.data.iter_mut() {
-            *a = f(*a);
-        }
-    }
-
-    /*
-    Element-wise natural log
-    */
-    pub fn log(&self) -> Matrix {
-        self.map(|x| x.ln())
-    }
-
-    /*
-    Element-wise exp
-    */
-    pub fn exp(&self) -> Matrix {
-        self.map(|x| x.exp())
-    }
-
-    /*
-    Element-wise power
-    */
-    pub fn pow(&self, exp: f64) -> Matrix {
-        self.map(|x| x.powf(exp))
-    }
-
-    /*
-    Prints the shape with a label: "name shape: rows x cols"
-    */
-    pub fn print_shape(&self, name: &str) {
-        println!("{} shape: {}x{}", name, self.rows, self.cols);
-    }
-
-    /*
     Returns the index of the maximum value in each column
     */
     pub fn argmax_columns(&self) -> Vec<usize> {
@@ -297,6 +302,15 @@ impl Matrix {
                 max_idx
             })
             .collect()
+    }
+
+    // ── Utility ───────────────────────────────────────────────────
+
+    /*
+    Prints the shape with a label: "name shape: rows x cols"
+    */
+    pub fn print_shape(&self, name: &str) {
+        println!("{} shape: {}x{}", name, self.rows, self.cols);
     }
 }
 

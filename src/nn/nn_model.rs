@@ -28,10 +28,10 @@ pub fn nn_model(
         costs         -- average cross-entropy cost per epoch
     */
 
+    // Step 1: Initialise parameters (He init for weights, zero for biases)
     let n_x = X_train.rows;
     let n_y = Y_train.rows;
     let m = X_train.cols;
-
     let (mut W1, mut b1, mut W2, mut b2) = initialize_parameters::initialize_parameters(n_x, config.n_h, n_y);
 
     println!("{:>5}  {:>12}  {:>10}  {:>10}", "Epoch", "Cost", "Train", "Val");
@@ -39,7 +39,9 @@ pub fn nn_model(
     let mut rng = rand::thread_rng();
     let mut costs = Vec::new();
 
+    // Step 2: Loop over epochs
     for epoch in 0..config.num_epochs {
+        // Step 2a: Shuffle training indices (Fisher-Yates)
         let mut indices: Vec<usize> = (0..m).collect();
         for i in (1..m).rev() {
             let j = rng.gen_range(0..=i);
@@ -49,10 +51,12 @@ pub fn nn_model(
         let mut epoch_cost = 0.0;
         let mut num_batches = 0;
 
+        // Step 2b: Mini-batch gradient descent
         for batch_start in (0..m).step_by(config.batch_size) {
             let batch_end = std::cmp::min(batch_start + config.batch_size, m);
             let batch_size_actual = batch_end - batch_start;
 
+            // Step 2b-i: Extract mini-batch from shuffled indices
             let mut X_batch = Matrix::new(n_x, batch_size_actual);
             let mut Y_batch = Matrix::new(n_y, batch_size_actual);
             for (k, &idx) in indices[batch_start..batch_end].iter().enumerate() {
@@ -64,27 +68,33 @@ pub fn nn_model(
                 }
             }
 
+            // Step 2b-ii: Forward propagation (ReLU → softmax)
             let (A2, cache) = forward_propagation::forward_propagation(
                 &X_batch, &W1, &b1, &W2, &b2,
             );
 
+            // Step 2b-iii: Compute cross-entropy cost
             let cost = compute_cost::compute_cost(&A2, &Y_batch);
             epoch_cost += cost;
             num_batches += 1;
 
+            // Step 2b-iv: Backward propagation (dZ2 = A2 - Y, then dW/db)
             let grads = backward_propagation::backward_propagation(
                 &W1, &W2, &cache, &X_batch, &Y_batch,
             );
 
+            // Step 2b-v: Update parameters (SGD: W ← W - lr · dW)
             update_parameters::update_parameters(
                 &mut W1, &mut b1, &mut W2, &mut b2,
                 &grads, config.learning_rate,
             );
         }
 
+        // Step 2c: Average cost over all batches in this epoch
         let avg_cost = epoch_cost / num_batches as f64;
         costs.push(avg_cost);
 
+        // Step 2d: Print epoch progress (train / validation accuracy)
         if config.print_cost {
             let train_acc = evaluate::accuracy(X_train, Y_train, &W1, &b1, &W2, &b2);
             let val_acc = evaluate::accuracy(X_val, Y_val, &W1, &b1, &W2, &b2);

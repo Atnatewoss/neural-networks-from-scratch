@@ -1,6 +1,8 @@
 use crate::utils::matrix::Matrix;
 
+// Stable softmax: subtract row max before exponentiation to avoid overflow
 pub fn forward(Z: &Matrix) -> Matrix {
+    // Step 1: Find the maximum value in each column (for numerical stability)
     let max_per_col = (0..Z.cols)
         .map(|j| {
             let mut max_val = Z.data[j];
@@ -14,6 +16,7 @@ pub fn forward(Z: &Matrix) -> Matrix {
         })
         .collect::<Vec<f64>>();
 
+    // Step 2: Exponentiate (value - max) and compute column sums
     let mut data = vec![0.0; Z.rows * Z.cols];
     for j in 0..Z.cols {
         let mut col_sum = 0.0;
@@ -22,6 +25,7 @@ pub fn forward(Z: &Matrix) -> Matrix {
             data[i * Z.cols + j] = ex;
             col_sum += ex;
         }
+        // Step 3: Normalise each column to sum to 1 (probability distribution)
         for i in 0..Z.rows {
             data[i * Z.cols + j] /= col_sum;
         }
