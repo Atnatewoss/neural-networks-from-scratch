@@ -42,14 +42,14 @@ pub fn save<P: AsRef<Path>>(
         W2: W2.clone(),
         b2: b2.clone(),
     };
-    let file = fs::File::create(path).expect("failed to create model file");
+    let file = fs::File::create(&path).expect("failed to create model file");
     serde_json::to_writer_pretty(file, &model).expect("failed to write model JSON");
-    println!("Model saved");
+    println!("Saved model to {}", path.as_ref().display());
 }
 
-pub fn load<P: AsRef<Path>>(path: P) -> (Matrix, Matrix, Matrix, Matrix, usize) {
-    let file = fs::File::open(path).expect("failed to open model file");
+pub fn load<P: AsRef<Path>>(path: P) -> (Matrix, Matrix, Matrix, Matrix) {
+    let file = fs::File::open(&path).expect("failed to open model file");
     let model: ModelData = serde_json::from_reader(file).expect("failed to parse model JSON");
-    println!("Model loaded (n_h = {})", model.n_h);
-    (model.W1, model.b1, model.W2, model.b2, model.n_h)
+    println!("Loaded model from {} (n_h = {})", path.as_ref().display(), model.n_h);
+    (model.W1, model.b1, model.W2, model.b2)
 }
