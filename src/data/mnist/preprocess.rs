@@ -5,10 +5,7 @@ use crate::utils::matrix::Matrix;
 // Preprocessing pipeline
 
 /*
-Step 1: flatten each image into a column vector and stack into (features, m).
-For MNIST: each image is 28x28 = 784 pixels.
-The output matrix has shape (pixels_per_image, num_images) so that each column
-is one flattened sample -- this is the convention used by the nn module.
+Step 1: flatten each image into a column vector and stack into (features, m). For MNIST: each image is 28x28 = 784 pixels.
 */
 pub fn flatten_images(raw: &[u8], num_images: usize, pixels_per_image: usize) -> Matrix {
     /*
@@ -21,11 +18,11 @@ pub fn flatten_images(raw: &[u8], num_images: usize, pixels_per_image: usize) ->
         Matrix of shape (pixels_per_image, num_images)
     */
 
-    let mut data = Vec::with_capacity(num_images * pixels_per_image);
-    for i in 0..num_images {
-        let offset = i * pixels_per_image;
-        for j in 0..pixels_per_image {
-            data.push(raw[offset + j] as f64 / 255.0);
+    let mut data = vec![0.0; num_images * pixels_per_image];
+    for c in 0..num_images {
+        let offset = c * pixels_per_image;
+        for r in 0..pixels_per_image {
+            data[r * num_images + c] = raw[offset + r] as f64 / 255.0;
         }
     }
     Matrix::from_vec(data, pixels_per_image, num_images)
@@ -45,20 +42,12 @@ pub fn one_hot(raw: &[u8], num_labels: usize) -> Matrix {
     */
 
     let mut data = vec![0.0; num_labels * 10];
-    for i in 0..num_labels {
-        let label = raw[i] as usize;
-        data[i * 10 + label] = 1.0;
+    for c in 0..num_labels {
+        let label = raw[c] as usize;
+        data[label * num_labels + c] = 1.0;
     }
     Matrix::from_vec(data, 10, num_labels)
 }
-
-// ---------------------------------------------------------------------------
-// Shuffle before split
-//
-// MNIST on disk is ordered by class (all 0s, then 1s, then 2s, ...).
-// Splitting without shuffling produces a biased validation set.
-// We must apply the same random column permutation to both images and labels.
-// ---------------------------------------------------------------------------
 
 /*
 Apply the same random column permutation to X and Y.

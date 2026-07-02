@@ -4,7 +4,7 @@ use crate::nn::forward_propagation;
 /*
 Predict class labels and compute accuracy against ground truth.
 
-Standard approach: forward propagation → softmax → argmax → compare.
+Standard approach: forward propagation → softmax → argmax → compare. 
 Softmax produces a probability distribution over classes; argmax
 selects the most likely class; accuracy is the fraction correct.
 
