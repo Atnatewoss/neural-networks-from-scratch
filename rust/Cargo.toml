@@ -1,0 +1,9 @@
+[package]
+name = "nnfs"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+rand = "0.8"
+ureq = "2"
+flate2 = "1"
