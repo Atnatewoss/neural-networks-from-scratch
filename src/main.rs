@@ -28,7 +28,7 @@ fn main() {
 
     let model_dir = Path::new("models");
     fs::create_dir_all(model_dir).expect("failed to create models/");
-    let model_path = model_dir.join("mnist.nn");
+    let model_path = model_dir.join("mnist.json");
     save_load::save(&model_path, &W1, &b1, &W2, &b2, config.n_h);
 
     // round-trip: load back and verify accuracy matches

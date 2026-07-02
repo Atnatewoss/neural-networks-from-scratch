@@ -1,3 +1,18 @@
+/*
+Serialises and deserialises model parameters to/from JSON
+using serde_json. The .json file contains W1, b1, W2, b2
+and the hidden-layer size n_h for shape validation.
+
+Example JSON structure:
+{
+  "n_h": 128,
+  "W1": { "rows": 128, "cols": 784, "data": [...] },
+  "b1": { "rows": 128, "cols": 1,   "data": [...] },
+  "W2": { "rows": 10,  "cols": 128, "data": [...] },
+  "b2": { "rows": 10,  "cols": 1,   "data": [...] }
+}
+*/
+
 use std::fs;
 use std::path::Path;
 use serde::{Serialize, Deserialize};

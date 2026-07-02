@@ -39,7 +39,7 @@ as JSON. To reload it later and run inference on test data:
 use nnfs::nn::save_load;
 use nnfs::nn::evaluate;
 
-let (W1, b1, W2, b2, n_h) = save_load::load("models/mnist.nn");
+let (W1, b1, W2, b2, n_h) = save_load::load("models/mnist.json");
 let acc = evaluate::accuracy(X_test, Y_test, &W1, &b1, &W2, &b2);
 println!("Test accuracy: {:.2}%", acc);
 ```
@@ -110,7 +110,7 @@ println!("Test accuracy: {:.2}%", acc);
                                     │ save (JSON)
                                     ▼
                          ┌─────────────────────┐
-                         │  models/mnist.nn    │
+                         │  models/mnist.json  │
                          └──────────┬──────────┘
                                     │ load
                                     ▼
@@ -172,6 +172,8 @@ src/
     ReLU.rs            -- ReLU activation (scalar and matrix)
     softmax.rs         -- stable softmax (max subtraction)
   data/
+  models/
+    README.md          -- describes the model storage format
     mod.rs             -- data module declaration
     mnist.rs           -- module root: MnistData struct + load() orchestration
     mnist/
