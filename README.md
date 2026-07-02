@@ -1,6 +1,6 @@
-# Neural Network from Scratch
+# Neural Networks from Scratch
 
-A minimal neural network framework built from scratch in Rust. Educational -- implements forward propagation, backpropagation, and mini-batch gradient descent without any ML framework dependencies.
+A minimal neural networks framework built from scratch in Rust. Educational -- implements forward propagation, backpropagation, and mini-batch gradient descent without any ML framework dependencies.
 
 ## Getting Started
 
@@ -29,9 +29,7 @@ let config = Config { learning_rate: 0.1, ..Config::default() };
 
 ### Model Persistence
 
-After training, the model is automatically saved to `models/mnist.json` as JSON.
-On subsequent runs `main.rs` checks if this file exists — if so, it loads the
-saved model instead of retraining. To use the API elsewhere:
+After training, the model is automatically saved to `models/mnist.json` as JSON. On subsequent runs `main.rs` checks if this file exists - if so, it loads the saved model instead of retraining. To use the API elsewhere:
 
 ```rust
 use nnfs::nn::save_load;
@@ -163,13 +161,14 @@ src/
     ReLU.rs            -- ReLU activation (scalar and matrix)
     softmax.rs         -- stable softmax (max subtraction)
   data/
-    .gitkeep           -- dataset directory
-  models/
-    .gitkeep           -- saved model parameters go here
     mod.rs             -- data module declaration
     mnist.rs           -- module root: MnistData struct + load() orchestration
     mnist/
       download.rs      -- HTTPS download + gzip decompression
       parse.rs         -- IDX binary parser
       preprocess.rs    -- flatten, normalise, one-hot, shuffle, split
+data/
+  .gitkeep             -- dataset directory
+models/
+  .gitkeep             -- saved model parameters go here
 ```
