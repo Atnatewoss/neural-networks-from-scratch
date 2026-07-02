@@ -1,9 +1,11 @@
 use std::fmt;
+use serde::{Serialize, Deserialize};
 
 /*
 Matrix: row-major storage
   data[row * cols + col]
 */
+#[derive(Serialize, Deserialize)]
 pub struct Matrix {
     pub data: Vec<f64>,
     pub rows: usize,

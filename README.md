@@ -30,6 +30,20 @@ Hyperparameters can be overridden in `src/main.rs`:
 let config = Config { learning_rate: 0.1, ..Config::default() };
 ```
 
+### Model Persistence
+
+After training, the model is automatically saved to `models/mnist.nn`
+as JSON. To reload it later and run inference on test data:
+
+```rust
+use nnfs::nn::save_load;
+use nnfs::nn::evaluate;
+
+let (W1, b1, W2, b2, n_h) = save_load::load("models/mnist.nn");
+let acc = evaluate::accuracy(X_test, Y_test, &W1, &b1, &W2, &b2);
+println!("Test accuracy: {:.2}%", acc);
+```
+
 ## Pipeline
 
 ```
@@ -93,6 +107,17 @@ let config = Config { learning_rate: 0.1, ..Config::default() };
                          │   Trained model     │
                          │  (W1, b1, W2, b2)  │
                          └──────────┬──────────┘
+                                    │ save (JSON)
+                                    ▼
+                         ┌─────────────────────┐
+                         │  models/mnist.nn    │
+                         └──────────┬──────────┘
+                                    │ load
+                                    ▼
+                         ┌─────────────────────┐
+                         │   Reloaded model    │
+                         │  (W1, b1, W2, b2)  │
+                         └──────────┬──────────┘
                                     │ predict: forward(A2) → argmax
                                     ▼
                          ┌─────────────────────┐
@@ -138,6 +163,7 @@ src/
     initialize_parameters.rs -- He initialization
     update_parameters.rs    -- SGD weight update
     predict.rs              -- inference (forward + argmax)
+    save_load.rs            -- JSON serialization (save / load)
     evaluate.rs             -- accuracy computation
     layer_size.rs           -- dimension extraction
   utils/
