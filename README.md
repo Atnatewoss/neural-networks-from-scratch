@@ -111,7 +111,7 @@ println!("Test accuracy: {:.2}%", acc);
                                ┌─────────────────────┐
                                │  Evaluate on test   │
                                └──────────┬──────────┘
-                                          │ predict: forward(A2) → argmax
+                                           │ argmax on A2 → class
                                           ▼
                                ┌─────────────────────┐
                                │   Predicted digit   │
