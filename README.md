@@ -1,4 +1,4 @@
-# NN from Scratch
+# Neural Network from Scratch
 
 A minimal neural network framework built from scratch in Rust. Educational -- implements forward propagation, backpropagation, and mini-batch gradient descent without any ML framework dependencies.
 
@@ -154,9 +154,8 @@ src/
     compute_cost.rs         -- categorical cross-entropy
     initialize_parameters.rs -- He initialization
     update_parameters.rs    -- SGD weight update
-    predict.rs              -- inference (forward + argmax)
     save_load.rs            -- JSON serialization (save / load)
-    evaluate.rs             -- accuracy computation
+    evaluate.rs             -- accuracy computation (forward → argmax → compare)
     layer_size.rs           -- dimension extraction
   utils/
     mod.rs             -- utils module declaration

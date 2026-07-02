@@ -5,6 +5,5 @@ pub mod forward_propagation;
 pub mod initialize_parameters;
 pub mod layer_size;
 pub mod nn_model;
-pub mod predict;
 pub mod save_load;
 pub mod update_parameters;
